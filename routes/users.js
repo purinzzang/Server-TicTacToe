@@ -81,7 +81,12 @@ router.post('/signin', async function(req, res, next) {
         req.session.userId = existingUser._id.toString();
         req.session.username = existingUser.username;
         req.session.nickname = existingUser.nickname;
-        res.json({ result: ResponseType.SUCCESS });
+        // 닉네임/아이디를 응답에 포함
+        res.json({
+        result: ResponseType.SUCCESS,
+        userId: existingUser._id.toString(),
+        nickname: existingUser.nickname,
+        });
       } else {
         res.status(401).json({ result: ResponseType.INVALID_PASSWORD });
       }
@@ -91,6 +96,22 @@ router.post('/signin', async function(req, res, next) {
   } catch (error) {
     console.error('Error during signin:', error);
     res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+// 로그아웃
+router.get('/signout', function(req, res, next) {
+  if (req.session) {
+    // 세션 삭제
+    req.session.destroy(function(err) {
+      if (err) {
+        return res.status(500).json({ message: 'Failed to log out.' });
+      } else {
+        return res.json({ message: 'Logged out successfully.' });
+      }
+    });
+  } else {
+    res.json({ message: 'No active session.' });
   }
 });
 
